@@ -1,21 +1,21 @@
-# connect-slow v0.2.1
+# connect-stop v0.1.0
 
-> Middleware to delay answering requests based on request url, useful to diagnose website behavior based on load delays
+> Middleware to stop answering requests based on request url, useful to diagnose website behavior based on server errors
 
-[![NPM][connect-slow-icon] ][connect-slow-url]
+[![NPM][connect-stop-icon] ][connect-stop-url]
 
-[![Build status][connect-slow-ci-image] ][connect-slow-ci-url]
-[![dependencies][connect-slow-dependencies-image] ][connect-slow-dependencies-url]
-[![devdependencies][connect-slow-devdependencies-image] ][connect-slow-devdependencies-url]
+[![Build status][connect-stop-ci-image] ][connect-stop-ci-url]
+[![dependencies][connect-stop-dependencies-image] ][connect-stop-dependencies-url]
+[![devdependencies][connect-stop-devdependencies-image] ][connect-stop-devdependencies-url]
 
-[connect-slow-icon]: https://nodei.co/npm/connect-slow.png?downloads=true
-[connect-slow-url]: https://npmjs.org/package/connect-slow
-[connect-slow-ci-image]: https://travis-ci.org/bahmutov/connect-slow.png?branch=master
-[connect-slow-ci-url]: https://travis-ci.org/bahmutov/connect-slow
-[connect-slow-dependencies-image]: https://david-dm.org/bahmutov/connect-slow.png
-[connect-slow-dependencies-url]: https://david-dm.org/bahmutov/connect-slow
-[connect-slow-devdependencies-image]: https://david-dm.org/bahmutov/connect-slow/dev-status.png
-[connect-slow-devdependencies-url]: https://david-dm.org/bahmutov/connect-slow#info=devDependencies
+[connect-stop-icon]: https://nodei.co/npm/connect-stop.png?downloads=true
+[connect-stop-url]: https://npmjs.org/package/connect-stop
+[connect-stop-ci-image]: https://travis-ci.org/bahmutov/connect-stop.png?branch=master
+[connect-stop-ci-url]: https://travis-ci.org/bahmutov/connect-stop
+[connect-stop-dependencies-image]: https://david-dm.org/bahmutov/connect-stop.png
+[connect-stop-dependencies-url]: https://david-dm.org/bahmutov/connect-stop
+[connect-stop-devdependencies-image]: https://david-dm.org/bahmutov/connect-stop/dev-status.png
+[connect-stop-devdependencies-url]: https://david-dm.org/bahmutov/connect-stop#info=devDependencies
 
 
 
@@ -43,14 +43,12 @@ If you use [Koa](http://koajs.com/) see [koa-slow](https://github.com/bahmutov/k
 
 ## Why?
 
-Controlled server-side delays allow to debug and polish
-website behavior, see
-[Give browser a chance](http://bahmutov.calepin.co/give-browser-a-chance.html)
+Controlled server-side responses allow to debug the website behavior.
 
 install:
 
 ```
-npm install connect-slow --save
+npm install connect-stop --save
 ```
 
 slow down every requst by 1 second (default delay value)
@@ -104,8 +102,7 @@ slow({
 
 * [connect-pause](https://github.com/flesler/connect-pause) - extremely simple
 delay
-* [koa-slow](https://github.com/bahmutov/koa-slow) - same funtionality as
-connect-slow for [Koa](http://koajs.com/) server
+* [connect-slow](https://github.com/flesler/connect-slow) - delays selected requests
 
 
 
@@ -122,7 +119,7 @@ License: MIT - do anything with the code, but don't blame me if it does not work
 Spread the word: tweet, star on github, etc.
 
 Support: if you find any problems with this module, email / tweet /
-[open issue](https://github.com/bahmutov/connect-slow/issues) on Github
+[open issue](https://github.com/bahmutov/connect-stop/issues) on Github
 
 
 

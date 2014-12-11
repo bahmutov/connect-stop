@@ -8,9 +8,7 @@
 
 ## Why?
 
-Controlled server-side delays allow to debug and polish
-website behavior, see
-[Give browser a chance](http://bahmutov.calepin.co/give-browser-a-chance.html)
+Controlled server-side responses allow to debug the website behavior.
 
 {%= _.doc("./docs/use.md") %}
 

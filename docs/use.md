@@ -55,5 +55,4 @@ slow({
 
 * [connect-pause](https://github.com/flesler/connect-pause) - extremely simple
 delay
-* [koa-slow](https://github.com/bahmutov/koa-slow) - same funtionality as
-{%= name %} for [Koa](http://koajs.com/) server
+* [connect-slow](https://github.com/flesler/connect-slow) - delays selected requests
