@@ -1,4 +1,4 @@
-# connect-stop v0.2.0
+# connect-stop v0.2.1
 
 > Middleware to stop answering requests based on request url, useful to diagnose website behavior based on server errors
 
@@ -22,22 +22,21 @@
 ```js
 var connect = require('connect');
 var http = require('http');
-var slow = require('connect-slow');
+var stop = require('connect-stop');
 var app = connect()
     .use(connect.logger('dev'))
-    .use(slow({
+    .use(stop({
         url: /\.jpg$/i,
-        delay: 2000
+        response: 404
     }))
     .use(connect.static('public'));
 http.createServer(app).listen(4000);
-$ curl http://localhost:4000/index.html  // 1 ms
-$ curl http://localhost:4000/foto.jpg    // 2001 ms
+$ curl http://localhost:4000/index.html  // 200
+$ curl http://localhost:4000/foto.jpg    // 404
 ```
 
 Works with [Connect](http://www.senchalabs.org/connect/),
 [Express](http://expressjs.com/), [turtle-run](https://github.com/bahmutov/turtle-run). 
-If you use [Koa](http://koajs.com/) see [koa-slow](https://github.com/bahmutov/koa-slow).
 
 
 
@@ -69,7 +68,7 @@ var stop = require('connect-stop');
 var app = connect()
     .use(stop({
         url: /\.[jpg|jpeg]$/i,
-        response: 5404
+        response: 404
     }))
     ...
 ```

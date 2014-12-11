@@ -1,7 +1,7 @@
 {
   "name": "connect-stop",
   "description": "Middleware to stop answering requests based on request url, useful to diagnose website behavior based on server errors",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
   "bugs": {
     "url": "https://github.com/bahmutov/connect-stop/issues"

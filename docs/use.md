@@ -22,7 +22,7 @@ var stop = require('connect-stop');
 var app = connect()
     .use(stop({
         url: /\.[jpg|jpeg]$/i,
-        response: 5404
+        response: 404
     }))
     ...
 ```
