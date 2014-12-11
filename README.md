@@ -86,7 +86,7 @@ stop({
 #### Related projects
 
 * [connect-pause](https://github.com/flesler/connect-pause) - extremely simple delay
-* [connect-slow](https://github.com/flesler/connect-slow) - delays selected requests
+* [connect-slow](https://github.com/bahmutov/connect-slow) - delays selected requests
 
 
 
