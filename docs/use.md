@@ -4,55 +4,40 @@ install:
 npm install {%= name %} --save
 ```
 
-slow down every requst by 1 second (default delay value)
+stop every requst
 
 ```js
-var slow = require('connect-slow');
+var stop = require('connect-stop');
 var app = connect()
-    .use(slow())
+    .use(stop({
+        url: /.*/,
+        response: 500
+    }))
     ...
 ```
-slow down JPEG images by 500ms,
-let everything else be served as quick as possible
+Stop jpeg requests, let everything else through
 
 ```js
-var slow = require('connect-slow');
+var stop = require('connect-stop');
 var app = connect()
-    .use(slow({
+    .use(stop({
         url: /\.[jpg|jpeg]$/i,
-        delay: 500
+        response: 5404
     }))
     ...
 ```
 
-slow down JPEG images by 1000ms, slow down JavaScript files by 100ms
+You can see console log of stopped urls by passing option `debug`
 
 ```js
-var slow = require('connect-slow');
-var app = connect()
-    .use(slow({
-        url: /\.[jpg|jpeg]$/i,
-        delay: 1000
-    }))
-    .use(slow({
-        url: /\.js$/i,
-        delay: 100
-    }))
-    ...
-```
-
-You can see console log of delayed urls by passing option `debug`
-
-```js
-slow({
+stop({
     url: /\.[jpg|jpeg]$/i,
-    delay: 1000,
+    response: 500
     debug: true
 })
 ```
 
 ### Related projects
 
-* [connect-pause](https://github.com/flesler/connect-pause) - extremely simple
-delay
+* [connect-pause](https://github.com/flesler/connect-pause) - extremely simple delay
 * [connect-slow](https://github.com/flesler/connect-slow) - delays selected requests

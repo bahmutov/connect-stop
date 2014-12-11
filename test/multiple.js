@@ -3,7 +3,8 @@ var connect = require('connect');
 var q = require('q');
 var request = q.denodeify(require('request'));
 var http = require('http');
-var slow = require('..');
+var stop = require('..');
+var morgan = require('morgan');
 
 var port = 3440;
 var msg = 'hello world';
@@ -13,17 +14,17 @@ function sendMessage(req, res) {
   res.end(msg);
 }
 
-gt.module('multiple connect-slow', {
+gt.module('multiple connect-stop', {
   setupOnce: function () {
     var app = connect()
-    .use(connect.logger('dev'))
-    .use(slow({
-      url: /\.slow$/i,
-      delay: 500
+    .use(morgan('dev'))
+    .use(stop({
+      url: /\.stop$/i,
+      response: 404
     }))
-    .use(slow({
-      url: /\.very-slow$/i,
-      delay: 500
+    .use(stop({
+      url: /\.very-stop$/i,
+      response: 500
     }))
     .use(sendMessage);
     this.server = http.createServer(app).listen(port);
@@ -34,16 +35,12 @@ gt.module('multiple connect-slow', {
   }
 });
 
-gt.async('.slow requests are slow', function () {
-  var start = new Date();
-  request(url + '/foo.slow')
-  .then(function (data) {
-    gt.equal(data[0].statusCode, 200, 'code 200');
-    var end = new Date();
-    var ms = end - start;
-    gt.ok(ms >= 500, 'server responded in', ms, 'not in 500ms');
+gt.async('.stop requests get 404', function () {
+  request(url + '/foo.stop')
+  .then(function (response) {
+    gt.equal(response.statusCode, 404);
   })
-  .fail(function (err) {
+  .catch(function (err) {
     gt.ok(false, err);
   })
   .finally(function () {
@@ -51,16 +48,12 @@ gt.async('.slow requests are slow', function () {
   });
 });
 
-gt.async('.very-slow requests are slow too', function () {
-  var start = new Date();
-  request(url + '/foo.very-slow')
-  .then(function (data) {
-    gt.equal(data[0].statusCode, 200, 'code 200');
-    var end = new Date();
-    var ms = end - start;
-    gt.ok(ms >= 500, 'server responded in', ms, 'not in 500ms');
+gt.async('.very-stop requests are 500', function () {
+  request(url + '/foo.very-stop')
+  .then(function (response) {
+    gt.equal(response.statusCode, 500);
   })
-  .fail(function (err) {
+  .catch(function (err) {
     gt.ok(false, err);
   })
   .finally(function () {
@@ -68,16 +61,12 @@ gt.async('.very-slow requests are slow too', function () {
   });
 });
 
-gt.async('very requests are still fast', function () {
-  var start = new Date();
+gt.async('other requests are 200', function () {
   request(url + '/foo.html')
-  .then(function (data) {
-    gt.equal(data[0].statusCode, 200, 'code 200');
-    var end = new Date();
-    var ms = end - start;
-    gt.ok(ms >= 0 && ms < 100, 'server responded in', ms);
+  .then(function (response) {
+    gt.equal(response.statusCode, 200);
   })
-  .fail(function (err) {
+  .catch(function (err) {
     gt.ok(false, err);
   })
   .finally(function () {

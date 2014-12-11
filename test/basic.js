@@ -1,32 +1,32 @@
-/*global gt:false*/
-var slow = require('..');
+/* global gt:false */
+var stop = require('..');
 
-gt.module('connect-slow basics');
+gt.module('connect-stop basics');
 
 gt.test('basic info', function () {
-  gt.func(slow, 'connect-slow is a function');
+  gt.func(stop, 'connect-stop is a function');
 });
 
 gt.test('url should be a regexp', function () {
   gt.throws(function () {
-    slow({
+    stop({
       url: '.html'
     });
   }, 'AssertionError');
 });
 
-gt.test('delay should be positive', function () {
+gt.test('response should be positive', function () {
   gt.throws(function () {
-    slow({
-      delay: -100
+    stop({
+      response: -100
     });
   }, 'AssertionError');
 });
 
 gt.test('valid parameters', function () {
-  var fn = slow({
+  var fn = stop({
     url: /\.jpg$/i,
-    delay: 2000
+    response: 404
   });
   gt.arity(fn, 3, 'middleware expects 3 arguments');
 });

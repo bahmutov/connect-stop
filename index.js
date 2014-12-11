@@ -1,7 +1,7 @@
 var isRegExp = require('lodash.isregexp'),
     parseUrl = require('url').parse;
 
-module.exports = function connectSlowConfig(options) {
+module.exports = function connectStopConfig(options) {
   options = options || {};
   if (options.url) {
     if (!isRegExp(options.url)) {
@@ -9,58 +9,49 @@ module.exports = function connectSlowConfig(options) {
     }
   }
 
-  options.delay = options.delay || 1000;
-  if (options.delay < 1) {
-    throw new Error('Delay should be positive number, not ' + options.delay);
+  if (typeof options.response !== 'number' || options.response < 1) {
+    throw new Error('Response should be positive HTTP code, not ' + options.response);
   }
 
-  // Return the query delay if it makes sense for this request, else undefined
-  function getQueryDelay(url) {
-    var delay;
-    if (options.delayQueryParam) {
+  // Return the response for this url, if defined
+  function getQueryResponse(url) {
+    var response;
+    if (options.stopQueryParam) {
       var parsedUrl = parseUrl(url, true);
 
-      if (parsedUrl.query && parsedUrl.query[options.delayQueryParam]) {
-        var queryDelay = parseInt(parsedUrl.query[options.delayQueryParam]);
-        if (queryDelay > 1) {
-          delay = queryDelay;
+      if (parsedUrl.query && parsedUrl.query[options.stopQueryParam]) {
+        var queryResponse = parseInt(parsedUrl.query[options.stopQueryParam]);
+        if (queryResponse > 1) {
+          response = queryResponse;
         }
       }
     }
 
-    return delay;
+    return response;
   }
 
-  // Return the url delay if it makes sense for this request, else undefined
-  function getUrlDelay(url) {
-    var delay;
-    if (options.url && !options.url.test(url)) {
-      delay = 0;
+  function getUrlResponse(url) {
+    if (options.url && options.url.test(url)) {
+      return options.response;
     }
-
-    return delay;
   }
 
-  function getDelay(url) {
-    var delay = getQueryDelay(url);
-    if (delay === undefined) {
-      delay = getUrlDelay(url);
+  function getResponse(url) {
+    var response = getQueryResponse(url);
+    if (response === undefined) {
+      response = getUrlResponse(url);
     }
-
-    if (delay === undefined) {
-      delay = options.delay;
-    }
-
-    return delay;
+    return response;
   }
 
-  return function connectSlow(req, res, next) {
-    var delay = getDelay(req.url);
-    if (delay && delay > 0) {
+  return function connectStop(req, res, next) {
+    var response = getResponse(req.url);
+    if (response && response > 0) {
       if (options.debug) {
-        console.log('Connect-slow: delaying %s ms on url %s', delay, req.url);
+        console.log('Connect-stop: sending response %d to url %s', response, req.url);
       }
-      setTimeout(next, delay);
+      res.writeHead(response);
+      res.end();
     } else {
       next();
     }

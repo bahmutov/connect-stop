@@ -3,7 +3,8 @@ var connect = require('connect');
 var q = require('q');
 var request = q.denodeify(require('request'));
 var http = require('http');
-var slow = require('..');
+var stop = require('..');
+var morgan = require('morgan');
 
 var port = 3440;
 var msg = 'hello world';
@@ -13,44 +14,13 @@ function sendMessage(req, res) {
   res.end(msg);
 }
 
-gt.module('connect-slow default options tests', {
+gt.module('connect-stop default options tests', {
   setupOnce: function () {
     var app = connect()
-    .use(connect.logger('dev'))
-    .use(slow())
-    .use(sendMessage);
-    this.server = http.createServer(app).listen(port);
-  },
-  teardownOnce: function () {
-    this.server.close();
-    delete this.server;
-  }
-});
-
-gt.async('slow everything down', function () {
-  var start = new Date();
-  request(url)
-  .then(function (data) {
-    gt.equal(data[0].statusCode, 200, 'code 200');
-    var end = new Date();
-    var ms = end - start;
-    gt.ok(ms >= 1000, 'server responded in', ms, 'not in 1000ms');
-  })
-  .fail(function (err) {
-    gt.ok(false, err);
-  })
-  .finally(function () {
-    gt.start();
-  });
-});
-
-gt.module('connect-slow some resources', {
-  setupOnce: function () {
-    var app = connect()
-    .use(connect.logger('dev'))
-    .use(slow({
-      url: /\.slow$/i,
-      delay: 500
+    .use(morgan('dev'))
+    .use(stop({
+      url: /.*/,
+      response: 500
     }))
     .use(sendMessage);
     this.server = http.createServer(app).listen(port);
@@ -61,16 +31,42 @@ gt.module('connect-slow some resources', {
   }
 });
 
-gt.async('.slow requests are slow', function () {
-  var start = new Date();
-  request(url + '/foo.slow')
+gt.async('stop everything', function () {
+  request(url)
   .then(function (data) {
-    gt.equal(data[0].statusCode, 200, 'code 200');
-    var end = new Date();
-    var ms = end - start;
-    gt.ok(ms >= 500, 'server responded in', ms, 'not in 500ms');
+    gt.equal(data.statusCode, 500);
   })
-  .fail(function (err) {
+  .catch(function (err) {
+    gt.ok(false, err);
+  })
+  .finally(function () {
+    gt.start();
+  });
+});
+
+gt.module('connect-stop some resources', {
+  setupOnce: function () {
+    var app = connect()
+    .use(morgan('dev'))
+    .use(stop({
+      url: /\.stop$/i,
+      response: 500
+    }))
+    .use(sendMessage);
+    this.server = http.createServer(app).listen(port);
+  },
+  teardownOnce: function () {
+    this.server.close();
+    delete this.server;
+  }
+});
+
+gt.async('.stop requests are stop', function () {
+  request(url + '/foo.stop')
+  .then(function (data) {
+    gt.equal(data.statusCode, 500);
+  })
+  .catch(function (err) {
     gt.ok(false, err);
   })
   .finally(function () {
@@ -79,15 +75,11 @@ gt.async('.slow requests are slow', function () {
 });
 
 gt.async('other requests are still fast', function () {
-  var start = new Date();
   request(url + '/foo.html')
   .then(function (data) {
-    gt.equal(data[0].statusCode, 200, 'code 200');
-    var end = new Date();
-    var ms = end - start;
-    gt.ok(ms >= 0 && ms < 150, 'server responded in', ms);
+    gt.equal(data.statusCode, 200);
   })
-  .fail(function (err) {
+  .catch(function (err) {
     gt.ok(false, err);
   })
   .finally(function () {
@@ -95,13 +87,13 @@ gt.async('other requests are still fast', function () {
   });
 });
 
-gt.module('connect-slow query parameter', {
+gt.module('connect-stop query parameter', {
   setupOnce: function () {
     var app = connect()
-    .use(connect.logger('dev'))
-    .use(slow({
-      delay: 800,
-      delayQueryParam: 'slow'
+    .use(morgan('dev'))
+    .use(stop({
+      response: 800,
+      stopQueryParam: 'stop'
     }))
     .use(sendMessage);
     this.server = http.createServer(app).listen(port);
@@ -112,18 +104,13 @@ gt.module('connect-slow query parameter', {
   }
 });
 
-gt.async('slow down requests with the query param by the given delay', function () {
-  var start = new Date(),
-      delay = 400;
-  request(url + '?slow=' + delay)
+gt.async('stop down requests with the query param by the given delay', function () {
+  var response = 400;
+  request(url + '?stop=' + response)
   .then(function (data) {
-    gt.equal(data[0].statusCode, 200, 'code 200');
-    var end = new Date();
-    var ms = end - start;
-    gt.ok(ms >= delay && ms < delay + 200, 'server responded in', ms, 'not in ' +
-          delay + ' to ' + (delay + 200) + 'ms');
+    gt.equal(data.statusCode, 400, 'code 200');
   })
-  .fail(function (err) {
+  .catch(function (err) {
     gt.ok(false, err);
   })
   .finally(function () {
@@ -132,15 +119,11 @@ gt.async('slow down requests with the query param by the given delay', function 
 });
 
 gt.async('other requests use default options', function () {
-  var start = new Date();
   request(url)
   .then(function (data) {
-    gt.equal(data[0].statusCode, 200, 'code 200');
-    var end = new Date();
-    var ms = end - start;
-    gt.ok(ms >= 800, 'server responded in', ms, 'not in 800ms');
+    gt.equal(data.statusCode, 200, 'code 200');
   })
-  .fail(function (err) {
+  .catch(function (err) {
     gt.ok(false, err);
   })
   .finally(function () {
@@ -148,13 +131,14 @@ gt.async('other requests use default options', function () {
   });
 });
 
-gt.module('connect-slow query parameter and url regex', {
+gt.module('connect-stop query parameter and url regex', {
   setupOnce: function () {
     var app = connect()
-    .use(connect.logger('dev'))
-    .use(slow({
-      url: /\.slow$/,
-      delayQueryParam: 'slow'
+    .use(morgan('dev'))
+    .use(stop({
+      url: /\.stop$/,
+      stopQueryParam: 'stop',
+      response: 200
     }))
     .use(sendMessage);
     this.server = http.createServer(app).listen(port);
@@ -165,18 +149,13 @@ gt.module('connect-slow query parameter and url regex', {
   }
 });
 
-gt.async('.slow requests with the query param use the query delay', function () {
-  var start = new Date(),
-      delay = 400;
-  request(url + '/foo.slow?slow=' + delay)
+gt.async('.stop requests with the query param use the query delay', function () {
+  var response = 400;
+  request(url + '/foo.stop?stop=' + response)
   .then(function (data) {
-    gt.equal(data[0].statusCode, 200, 'code 200');
-    var end = new Date();
-    var ms = end - start;
-    gt.ok(ms >= delay && ms < delay + 200, 'server responded in', ms, 'not in ' +
-          delay + ' to ' + (delay + 200) + 'ms');
+    gt.equal(data.statusCode, 400, 'code 200');
   })
-  .fail(function (err) {
+  .catch(function (err) {
     gt.ok(false, err);
   })
   .finally(function () {
@@ -184,16 +163,12 @@ gt.async('.slow requests with the query param use the query delay', function () 
   });
 });
 
-gt.async('.slow requests without the query param use the default delay', function () {
-  var start = new Date();
-  request(url + '/foo.slow')
+gt.async('.stop requests without the query param use the default delay', function () {
+  request(url + '/foo.stop')
   .then(function (data) {
-    gt.equal(data[0].statusCode, 200, 'code 200');
-    var end = new Date();
-    var ms = end - start;
-    gt.ok(ms >= 1000, 'server responded in', ms, 'not in 1000ms');
+    gt.equal(data.statusCode, 200, 'code 200');
   })
-  .fail(function (err) {
+  .catch(function (err) {
     gt.ok(false, err);
   })
   .finally(function () {
@@ -202,17 +177,12 @@ gt.async('.slow requests without the query param use the default delay', functio
 });
 
 gt.async('other requests with the query param use the query delay', function () {
-  var start = new Date(),
-      delay = 400;
-  request(url + '?slow=' + delay)
+  var response = 400;
+  request(url + '?stop=' + response)
   .then(function (data) {
-    gt.equal(data[0].statusCode, 200, 'code 200');
-    var end = new Date();
-    var ms = end - start;
-    gt.ok(ms >= delay && ms < delay + 200, 'server responded in', ms, 'not in ' +
-          delay + ' to ' + (delay + 200) + 'ms');
+    gt.equal(data.statusCode, 400);
   })
-  .fail(function (err) {
+  .catch(function (err) {
     gt.ok(false, err);
   })
   .finally(function () {
@@ -221,15 +191,11 @@ gt.async('other requests with the query param use the query delay', function () 
 });
 
 gt.async('other requests without the query param are still fast', function () {
-  var start = new Date();
   request(url)
   .then(function (data) {
-    gt.equal(data[0].statusCode, 200, 'code 200');
-    var end = new Date();
-    var ms = end - start;
-    gt.ok(ms < 150, 'server responded in', ms);
+    gt.equal(data.statusCode, 200, 'code 200');
   })
-  .fail(function (err) {
+  .catch(function (err) {
     gt.ok(false, err);
   })
   .finally(function () {

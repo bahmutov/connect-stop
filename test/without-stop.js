@@ -3,6 +3,7 @@ var connect = require('connect');
 var q = require('q');
 var request = q.denodeify(require('request'));
 var http = require('http');
+var morgan = require('morgan');
 
 var port = 3440;
 var msg = 'hello world';
@@ -13,7 +14,7 @@ function sendMessage(req, res) {
 gt.module('without connect-slow tests', {
   setupOnce: function () {
     var app = connect()
-    .use(connect.logger('dev'))
+    .use(morgan('dev'))
     .use(sendMessage);
     this.server = http.createServer(app).listen(port);
   },
@@ -24,17 +25,11 @@ gt.module('without connect-slow tests', {
 });
 
 gt.async('simple test', function () {
-  var start = new Date();
   request('http://localhost:' + port + '/test.js')
   .then(function (data) {
-    // console.log(JSON.stringify(data, null, 2));
-    gt.equal(data[0].statusCode, 200, 'code 200');
-    gt.equal(data[1], msg, 'correct message');
-    var end = new Date();
-    var ms = end - start;
-    gt.ok(ms < 100, 'server responded in', ms, 'less than 100ms');
+    gt.equal(data.statusCode, 200, 'code 200');
   })
-  .fail(function (err) {
+  .catch(function (err) {
     gt.ok(false, err);
   })
   .finally(function () {
